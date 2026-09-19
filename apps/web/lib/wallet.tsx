@@ -27,7 +27,7 @@ export const xLayerTestnet = defineChain({
   name: X_LAYER_TESTNET.name,
   nativeCurrency: X_LAYER_TESTNET.nativeCurrency,
   rpcUrls: { default: { http: [X_LAYER_TESTNET.rpcUrl] } },
-  blockExplorers: { default: { name: "OKLink", url: X_LAYER_TESTNET.explorerUrl } },
+  blockExplorers: { default: { name: "OKX Explorer", url: X_LAYER_TESTNET.explorerUrl } },
   testnet: true,
 });
 
@@ -139,7 +139,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         available[0];
 
       if (!target) {
-        setError("No browser wallet detected. Install the OKX Wallet extension to continue.");
+        setError(
+          "No browser wallet detected. Install OKX Wallet or MetaMask, then reload this page.",
+        );
         return;
       }
 

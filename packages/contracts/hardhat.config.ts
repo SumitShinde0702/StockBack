@@ -33,8 +33,8 @@ const config: HardhatUserConfig = {
       chainId: 31337,
     },
     xlayerTestnet: {
-      url: process.env.XLAYER_RPC_URL ?? "https://testrpc.xlayer.tech",
-      chainId: 195,
+      url: process.env.XLAYER_RPC_URL ?? "https://testrpc.xlayer.tech/terigon",
+      chainId: 1952,
       accounts,
     },
   },

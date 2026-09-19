@@ -2,11 +2,11 @@ import type { Address } from "viem";
 
 /** X Layer testnet. Overridable so a judge can point the app at their own deployment. */
 export const X_LAYER_TESTNET = {
-  id: 195,
-  name: "X Layer Testnet",
+  id: 1952,
+  name: "X Layer testnet",
   nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 },
-  rpcUrl: process.env.NEXT_PUBLIC_XLAYER_RPC_URL ?? "https://testrpc.xlayer.tech",
-  explorerUrl: "https://www.oklink.com/xlayer-test",
+  rpcUrl: process.env.NEXT_PUBLIC_XLAYER_RPC_URL ?? "https://testrpc.xlayer.tech/terigon",
+  explorerUrl: "https://www.okx.com/web3/explorer/xlayer-test",
 } as const;
 
 export function explorerTx(hash: string) {

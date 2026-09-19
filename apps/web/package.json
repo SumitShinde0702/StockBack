@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json"
   },
   "dependencies": {
+    "@next/env": "^15.1.0",
     "@stockback/sgqr": "workspace:*",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.468.0",
