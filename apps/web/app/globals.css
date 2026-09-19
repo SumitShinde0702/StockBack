@@ -1,0 +1,218 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   StockBack design tokens.
+   Authoritative spec: design-system/stockback/pages/app.md
+   Never write a raw hex inside a component; add a token here instead.
+--------------------------------------------------------------------------- */
+@theme {
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* surfaces */
+  --color-canvas: #080b12;
+  --color-surface: #0e1320;
+  --color-raised: #151c2c;
+  --color-overlay: #1b2436;
+  --color-line: #232d42;
+  --color-line-strong: #33405a;
+
+  /* text */
+  --color-ink: #f4f7fb;
+  --color-ink-muted: #93a1b8;
+  --color-ink-subtle: #63708a;
+
+  /* brand + semantics */
+  --color-gold: #f5b23e;
+  --color-gold-dim: #8a6321;
+  --color-on-gold: #120c02;
+  --color-good: #3ed8a0;
+  --color-good-dim: #1c6349;
+  --color-warn: #f7c948;
+  --color-bad: #ff7a70;
+  --color-bad-dim: #7a2f2a;
+  --color-chain: #6fa8ff;
+  --color-chain-dim: #2a4a80;
+
+  /* radii */
+  --radius-control: 0.625rem;
+  --radius-card: 1rem;
+  --radius-sheet: 1.5rem;
+
+  /* motion */
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  --animate-scanline: scanline 2.4s var(--ease-standard) infinite;
+  --animate-rise: rise 240ms var(--ease-standard) both;
+  --animate-pop: pop 300ms var(--ease-spring) both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-pulse-dot: pulse-dot 2s var(--ease-standard) infinite;
+  --animate-draw-ring: draw-ring 520ms var(--ease-standard) both;
+
+  @keyframes scanline {
+    0% {
+      transform: translateY(0%);
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    88% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(1000%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      box-shadow: 0 0 0 0 currentColor;
+    }
+    50% {
+      opacity: 0.75;
+      box-shadow: 0 0 0 4px transparent;
+    }
+  }
+
+  @keyframes draw-ring {
+    from {
+      stroke-dashoffset: 170;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--color-canvas);
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior-y: none;
+  }
+
+  /* Financial figures must not jitter while a live price refreshes. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  label[for],
+  a[href],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  /* Hide scrollbars inside the phone surface without disabling scrolling. */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  /* Ambient depth for the app canvas. Deliberately not a "crypto gradient":
+     a single low-opacity warm glow, no hue rotation. */
+  .canvas-glow {
+    background-image: radial-gradient(
+        120% 70% at 50% -10%,
+        color-mix(in srgb, var(--color-gold) 9%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        90% 50% at 50% 110%,
+        color-mix(in srgb, var(--color-chain) 6%, transparent),
+        transparent 65%
+      );
+  }
+
+  .hairline-top {
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
+  }
+
+  .skeleton {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-raised) 25%,
+      var(--color-overlay) 50%,
+      var(--color-raised) 75%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

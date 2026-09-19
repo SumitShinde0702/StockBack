@@ -1,0 +1,23 @@
+{
+  "name": "stockback",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SGQR -> X Layer crypto checkout with loss-aware Spend Guard and 1% tokenized-stock cashback.",
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @stockback/web dev",
+    "build": "pnpm --filter @stockback/web build",
+    "start": "pnpm --filter @stockback/web start",
+    "lint": "pnpm --filter @stockback/web lint",
+    "typecheck": "pnpm -r --no-bail typecheck",
+    "test": "pnpm --filter @stockback/sgqr test && pnpm --filter @stockback/contracts test",
+    "test:sgqr": "pnpm --filter @stockback/sgqr test",
+    "test:contracts": "pnpm --filter @stockback/contracts test",
+    "deploy:xlayer": "pnpm --filter @stockback/contracts deploy:xlayer",
+    "seed:xlayer": "pnpm --filter @stockback/contracts seed:xlayer",
+    "verify:all": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  }
+}

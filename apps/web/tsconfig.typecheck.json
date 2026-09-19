@@ -1,0 +1,9 @@
+{
+  // Next rewrites `include` in tsconfig.json to point at its generated route types,
+  // which live in the build directory. That directory is relocated outside the project
+  // on OneDrive machines, where those generated files cannot resolve `next/*`.
+  // `next build` still type-checks them; this config is for the fast standalone pass.
+  "extends": "./tsconfig.json",
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", ".next"]
+}
