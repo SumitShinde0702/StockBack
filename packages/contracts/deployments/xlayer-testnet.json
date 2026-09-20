@@ -1,0 +1,30 @@
+{
+  "network": "xlayerTestnet",
+  "chainId": 1952,
+  "deployedAt": "2026-09-19T14:46:47.783Z",
+  "deployer": "0xfF595e2464102F19d8035790251F4B976d750af4",
+  "router": "0x42dfD0D5401f351D28122c450A0f062d4F866416",
+  "payToken": "0xb2c9ee8E99D782aa2bF7C14484A6d7168819EE3E",
+  "rewardToken": "0xe9e350aD4e479b844E7EBB41e5142497c7BA21e2",
+  "quoteSigner": "0xe6A2B95d039e1E249E7A4032B39E6E45b282f794",
+  "treasury": "0xfF595e2464102F19d8035790251F4B976d750af4",
+  "rewardFund": "0xfF595e2464102F19d8035790251F4B976d750af4",
+  "merchants": {
+    "202401234K": {
+      "label": "Ah Hock Kopitiam",
+      "settlement": "0x37d897Aedd71E1379947a54BFE472e7A9D05e9EC",
+      "identifierHash": "0x2616c4a3be33e29f09eb1fd70d2c7f235d9e2ec137f3aa3c4d89301c5b4057e7"
+    },
+    "199805678M": {
+      "label": "Bras Basah Books",
+      "settlement": "0xEB5169Fbc811DE18E4cef193959C67bd18b23036",
+      "identifierHash": "0xc157486f41efda3d9de17108990c2e0fbf072712cbb2aa9aea1a11fc08c5459a"
+    },
+    "53401234X": {
+      "label": "Maxwell Stall 42",
+      "settlement": "0x5a57530E6ddcc829049F12727107eDE1F3D77C8c",
+      "identifierHash": "0xc187dd2b30dd9473ac7da300fa57b55a315722b8a5fc26141d00b54e6ee4946a"
+    }
+  },
+  "notes": "DemoUSD and MockXNVDA are test tokens. MockXNVDA is not an xStock and carries no equity exposure."
+}

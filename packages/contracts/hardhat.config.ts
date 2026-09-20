@@ -3,13 +3,14 @@ import { resolve } from "node:path";
 import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
+import { normalizePrivateKey } from "./scripts/rpc";
 
 // The repo keeps one .env at the root so the web app and the contracts share addresses.
 loadEnv({ path: resolve(__dirname, "../../.env") });
 loadEnv({ path: resolve(__dirname, "../../.env.local"), override: true });
 
-const deployerKey = process.env.DEPLOYER_PRIVATE_KEY;
-const accounts = /^0x[0-9a-fA-F]{64}$/.test(deployerKey ?? "") ? [deployerKey as string] : [];
+const deployerKey = normalizePrivateKey(process.env.DEPLOYER_PRIVATE_KEY);
+const accounts = deployerKey ? [deployerKey] : [];
 
 const config: HardhatUserConfig = {
   solidity: {

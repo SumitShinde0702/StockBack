@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
+import { ArrowLeft } from "lucide-react";
 import { StatusStrip } from "./status-strip";
 import { TabBar } from "./tab-bar";
 import { PhoneFrame } from "./ui/phone-frame";
-import { ContextPanel } from "./context-panel";
 import { ScanScreen } from "./screens/scan-screen";
 import { AmountScreen } from "./screens/amount-screen";
 import { ReviewScreen } from "./screens/review-screen";
@@ -63,19 +64,23 @@ function AppSurface() {
 export function AppShell() {
   return (
     <div className="min-h-dvh">
-      {/* Mobile: the app is the whole viewport. This is the real product. */}
+      {/* Mobile: the app owns the whole viewport. This is the real product. */}
       <div className="h-dvh lg:hidden">
         <AppSurface />
       </div>
 
-      {/* Desktop: the same app inside a presentation frame, beside judge-facing context. */}
-      <div className="hidden min-h-dvh lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-16 lg:px-12 xl:gap-24 xl:px-20">
-        <ContextPanel />
-        <div className="py-12">
-          <PhoneFrame>
-            <AppSurface />
-          </PhoneFrame>
-        </div>
+      {/* Desktop: the same build inside a presentation frame. The pitch lives on "/". */}
+      <div className="hidden min-h-dvh lg:flex lg:flex-col lg:items-center lg:justify-center lg:gap-8 lg:py-12">
+        <PhoneFrame>
+          <AppSurface />
+        </PhoneFrame>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-control px-3 py-2 text-[13px] text-ink-muted transition-colors duration-200 ease-standard hover:text-ink"
+        >
+          <ArrowLeft size={14} aria-hidden="true" />
+          Back to the overview
+        </Link>
       </div>
     </div>
   );

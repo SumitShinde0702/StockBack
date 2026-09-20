@@ -24,6 +24,9 @@ coverage/
 .vitest/
 .eslintcache
 
+# vercel
+.vercel
+
 # os / editor
 .DS_Store
 Thumbs.db

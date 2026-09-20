@@ -129,6 +129,8 @@
   html {
     -webkit-text-size-adjust: 100%;
     background-color: var(--color-canvas);
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
   }
 
   body {

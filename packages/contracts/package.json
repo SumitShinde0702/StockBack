@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit",
     "deploy:local": "hardhat run scripts/deploy.ts",
     "deploy:xlayer": "hardhat run scripts/deploy.ts --network xlayerTestnet",
-    "seed:xlayer": "hardhat run scripts/seed.ts --network xlayerTestnet"
+    "seed:xlayer": "ts-node scripts/seed.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",

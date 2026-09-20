@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ethers, network } from "hardhat";
+import { normalizePrivateKey } from "./rpc";
 
 /**
  * Deploys the demo stack and writes an address file the web app reads.
@@ -36,8 +37,8 @@ async function main() {
     );
   }
 
-  const quoteSignerKey = process.env.QUOTE_SIGNER_PRIVATE_KEY;
-  if (!quoteSignerKey || !/^0x[0-9a-fA-F]{64}$/.test(quoteSignerKey)) {
+  const quoteSignerKey = normalizePrivateKey(process.env.QUOTE_SIGNER_PRIVATE_KEY);
+  if (!quoteSignerKey) {
     throw new Error(
       "QUOTE_SIGNER_PRIVATE_KEY must be set so the router and the /api/quote signer agree.",
     );
