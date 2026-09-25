@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardHeader } from "../ui/card";
 import { Callout } from "../ui/callout";
 import { Field } from "../ui/field";
+import { Button } from "../ui/button";
 import { SegmentedControl } from "../ui/segmented-control";
 import { StepHeader } from "../ui/step-header";
 import { Toggle } from "../ui/toggle";
@@ -24,24 +25,48 @@ const TOLERANCES = [
   { value: "1000", label: "10%" },
 ];
 
+function basisFromSettings(costBasis: Record<string, number>) {
+  return Object.fromEntries(
+    PAY_ASSETS.map((a) => [a.symbol, costBasis[a.symbol]?.toString() ?? ""]),
+  );
+}
+
 export function SettingsScreen() {
   const { settings } = useAppState();
   const dispatch = useAppDispatch();
   const [drafts, setDrafts] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      PAY_ASSETS.map((a) => [a.symbol, settings.costBasis[a.symbol]?.toString() ?? ""]),
-    ),
+    basisFromSettings(settings.costBasis),
   );
+  const [savedFlash, setSavedFlash] = useState(false);
 
-  function commitBasis(symbol: string, raw: string) {
-    const next = { ...settings.costBasis };
-    const parsed = Number(raw);
-    if (raw.trim() === "" || !Number.isFinite(parsed) || parsed <= 0) {
-      delete next[symbol];
-    } else {
-      next[symbol] = parsed;
+  const dirty = useMemo(() => {
+    return PAY_ASSETS.some((asset) => {
+      const draft = (drafts[asset.symbol] ?? "").trim();
+      const saved = settings.costBasis[asset.symbol];
+      if (draft === "" && (saved === undefined || saved === null)) return false;
+      if (draft === "" && saved !== undefined) return true;
+      const parsed = Number(draft);
+      if (!Number.isFinite(parsed)) return true;
+      return saved !== parsed;
+    });
+  }, [drafts, settings.costBasis]);
+
+  function commitAll() {
+    const next: Record<string, number> = { ...settings.costBasis };
+    for (const asset of PAY_ASSETS) {
+      const raw = (drafts[asset.symbol] ?? "").trim();
+      const parsed = Number(raw);
+      if (raw === "" || !Number.isFinite(parsed) || parsed <= 0) {
+        delete next[asset.symbol];
+        setDrafts((d) => ({ ...d, [asset.symbol]: "" }));
+      } else {
+        next[asset.symbol] = parsed;
+        setDrafts((d) => ({ ...d, [asset.symbol]: String(parsed) }));
+      }
     }
     dispatch({ type: "update-settings", patch: { costBasis: next } });
+    setSavedFlash(true);
+    window.setTimeout(() => setSavedFlash(false), 1600);
   }
 
   return (
@@ -98,12 +123,23 @@ export function SettingsScreen() {
                 onChange={(event) => {
                   const value = event.target.value.replace(/[^\d.]/g, "");
                   setDrafts((d) => ({ ...d, [asset.symbol]: value }));
+                  setSavedFlash(false);
                 }}
-                onBlur={(event) => commitBasis(asset.symbol, event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    commitAll();
+                    (event.target as HTMLInputElement).blur();
+                  }
+                }}
               />
             ))}
+            <Button block disabled={!dirty} onClick={commitAll}>
+              {savedFlash ? "Saved" : "Save cost basis"}
+            </Button>
             <p className="text-[11.5px] leading-snug text-ink-subtle">
-              Stored only in this browser.
+              Stored only in this browser. Toggle and tolerance save immediately; cost basis
+              needs Save.
             </p>
           </div>
         </Card>

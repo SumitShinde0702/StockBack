@@ -17,11 +17,23 @@ export function LandingFooter() {
 
           <nav aria-label="Footer" className="flex flex-col gap-2.5 text-[13px]">
             <Link
+              href="/seller"
+              className="text-ink-muted transition-colors duration-200 ease-standard hover:text-ink"
+            >
+              Seller QR stickers
+            </Link>
+            <Link
               href="/app"
               className="text-ink-muted transition-colors duration-200 ease-standard hover:text-ink"
             >
               Open the app
             </Link>
+            <a
+              href="#architecture"
+              className="text-ink-muted transition-colors duration-200 ease-standard hover:text-ink"
+            >
+              Architecture
+            </a>
             <a
               href="#how"
               className="text-ink-muted transition-colors duration-200 ease-standard hover:text-ink"
@@ -33,6 +45,12 @@ export function LandingFooter() {
               className="text-ink-muted transition-colors duration-200 ease-standard hover:text-ink"
             >
               Limitations
+            </a>
+            <a
+              href="#deployment"
+              className="text-ink-muted transition-colors duration-200 ease-standard hover:text-ink"
+            >
+              Contracts
             </a>
           </nav>
         </div>

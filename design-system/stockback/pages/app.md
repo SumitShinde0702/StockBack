@@ -33,7 +33,7 @@ Semantic only. Never write a raw hex in a component.
 | `--sb-warning` | `#F7C948` | Stale quote, degraded data |
 | `--sb-danger` | `#FF7A70` | Guard block, failure, rejection |
 | `--sb-chain` | `#6FA8FF` | X Layer / onchain facts |
-| `--sb-rail-sgqr` | `#93A1B8` | Rail badge: decoded, offchain |
+| `--sb-rail-sgqr` | `#93A1B8` | Rail badge: decoded locally (SGQR has no EVM address) |
 | `--sb-rail-xlayer` | `#6FA8FF` | Rail badge: real onchain settlement |
 | `--sb-rail-reward` | `#F5B23E` | Rail badge: xStock cashback |
 

@@ -16,6 +16,26 @@ deployed yet and the app is running in preview mode.
 | `DemoUSD` (`dUSD`) | Six-decimal test stablecoin. Mintable by anyone. Not redeemable |
 | `MockXNVDA` (`mXNVDA`) | Test reward token. Not an xStock, no equity exposure |
 
+### Sample settlement
+
+A complete signed-quote payment is on X Layer testnet (first deployment, pre-permit router).
+Status `1` (success), block `41869095`. Four ERC-20 transfers: the router pulls DemoUSD from
+the payer, then splits it to the merchant, the treasury, and the reward fund at the 1% / 1%
+split.
+
+Current deployment uses EIP-2612 `settleWithPermit` so the app no longer waits for a separate
+approve transaction. Addresses live in `packages/contracts/deployments/xlayer-testnet.json`.
+
+| Field | Value |
+| --- | --- |
+| Tx | [`0xbea6e47f944132bd5b2cfe6c2d4612948830a2f9da01a229c7725c6808b22bb9`](https://www.okx.com/web3/explorer/xlayer-test/tx/0xbea6e47f944132bd5b2cfe6c2d4612948830a2f9da01a229c7725c6808b22bb9) |
+| Prior router | `0x42dfD0D5401f351D28122c450A0f062d4F866416` |
+| Current router | `0x54dFC9CcfED6cAc285d60Feb555D3257429879DD` |
+| Payer | `0xfF595e2464102F19d8035790251F4B976d750af4` |
+| Invoice | S$12.50 to Ah Hock Kopitiam |
+
+Reproduce with a running quote API: `pnpm --filter @stockback/contracts exec ts-node scripts/settle-demo.ts`
+
 ## Deploying to X Layer testnet
 
 ```bash
@@ -40,12 +60,22 @@ stablecoin to a wallet and deposits reward backing so a withdrawal actually pays
 
 ```solidity
 function settle(Quote calldata quote, bytes calldata signature) external;
+function settleWithPermit(
+    Quote calldata quote,
+    bytes calldata signature,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+) external;
 function grossAmount(Quote calldata quote) external pure returns (uint256);
 function hashQuote(Quote calldata quote) public view returns (bytes32);
 ```
 
-The payer must approve `grossAmount(quote)` on the pay token first. `settle` reverts unless
-every one of these holds:
+The payer must approve `grossAmount(quote)` on the pay token first, **or** call
+`settleWithPermit` with an ERC-2612 signature so allowance and settlement land in one
+transaction. `settle` reverts unless every one of these holds:
 
 | Check | Revert |
 | --- | --- |

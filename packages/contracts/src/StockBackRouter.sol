@@ -2,6 +2,7 @@
 pragma solidity 0.8.24;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -181,8 +182,32 @@ contract StockBackRouter is Ownable, EIP712, ReentrancyGuard {
     /**
      * @notice Settles one invoice: debits the payer once, splits the proceeds, credits cashback.
      * @dev The payer must have approved `grossAmount(quote)` on the pay token first.
+     *      Prefer `settleWithPermit` when allowance is missing so the user waits for one tx.
      */
     function settle(Quote calldata quote, bytes calldata signature) external nonReentrant {
+        _settle(quote, signature);
+    }
+
+    /**
+     * @notice Same as `settle`, but first consumes an ERC-2612 permit for the pay token.
+     * @dev One MetaMask confirmation mines both the allowance and the settlement. Use a
+     *      generous `value` (e.g. type(uint256).max) so later payments can call `settle`
+     *      without another signature.
+     */
+    function settleWithPermit(
+        Quote calldata quote,
+        bytes calldata signature,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external nonReentrant {
+        IERC20Permit(address(payToken)).permit(msg.sender, address(this), value, deadline, v, r, s);
+        _settle(quote, signature);
+    }
+
+    function _settle(Quote calldata quote, bytes calldata signature) private {
         if (quote.expiry < block.timestamp) revert QuoteExpired(quote.expiry, block.timestamp);
         if (quote.payer != msg.sender) revert PayerMismatch(quote.payer, msg.sender);
         if (quoteSettled[quote.quoteId]) revert QuoteAlreadySettled(quote.quoteId);

@@ -2,18 +2,30 @@
 
 import { useCallback } from "react";
 import type { Address, Hex } from "viem";
-import { CONTRACTS } from "./config";
+import { hexToSignature, maxUint256 } from "viem";
+import { CONTRACTS, X_LAYER_TESTNET } from "./config";
 import { describeSettlementError, erc20Abi, routerAbi } from "./router-abi";
 import { useAppDispatch } from "./store";
 import type { QuoteResponse } from "./quote-types";
 import { publicClient, useWallet, xLayerTestnet } from "./wallet";
 
+const PERMIT_TYPES = {
+  Permit: [
+    { name: "owner", type: "address" },
+    { name: "spender", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
+    { name: "deadline", type: "uint256" },
+  ],
+} as const;
+
 /**
  * Real settlement against the deployed router.
  *
- * Approve (only when the existing allowance is short) -> sign -> wait for the receipt ->
- * read the ledger back from the chain. The ledger figure shown after a payment is the
- * contract's own number, not a locally accumulated guess.
+ * Fast path: if allowance already covers the debit, one `settle` tx.
+ * Cold path: EIP-2612 permit signature + `settleWithPermit` in a single mined
+ * transaction — no separate approve wait (that was causing InsufficientAllowance
+ * when MetaMask settled before the approve receipt landed).
  */
 export function useOnchainPayment() {
   const dispatch = useAppDispatch();
@@ -68,46 +80,94 @@ export function useOnchainPayment() {
           args: [address, CONTRACTS.router],
         });
 
-        if (allowance < gross) {
-          dispatch({ type: "tx-status", status: "approving" });
-          const approvalHash = await walletClient.writeContract({
-            address: CONTRACTS.payToken,
-            abi: erc20Abi,
-            functionName: "approve",
-            args: [CONTRACTS.router, gross],
+        let hash: Hex;
+
+        if (allowance >= gross) {
+          dispatch({ type: "tx-status", status: "awaiting-signature" });
+
+          await publicClient.simulateContract({
+            address: CONTRACTS.router,
+            abi: routerAbi,
+            functionName: "settle",
+            args: [settleArgs, quote.signature as Hex],
+            account: address,
+          });
+
+          hash = await walletClient.writeContract({
+            address: CONTRACTS.router,
+            abi: routerAbi,
+            functionName: "settle",
+            args: [settleArgs, quote.signature as Hex],
             account: address,
             chain: xLayerTestnet,
           });
-          const approval = await publicClient.waitForTransactionReceipt({ hash: approvalHash });
-          if (approval.status !== "success") {
-            dispatch({
-              type: "tx-status",
-              status: "failed",
-              error: "The token approval reverted, so nothing was charged.",
-            });
-            return;
-          }
+        } else {
+          // Sign permit off-chain (instant), then settleWithPermit mines once.
+          dispatch({ type: "tx-status", status: "approving" });
+
+          const nonce = await publicClient.readContract({
+            address: CONTRACTS.payToken,
+            abi: erc20Abi,
+            functionName: "nonces",
+            args: [address],
+          });
+          const deadline = BigInt(Math.floor(Date.now() / 1000) + 20 * 60);
+
+          const permitSignature = await walletClient.signTypedData({
+            account: address,
+            domain: {
+              name: "StockBack Demo USD",
+              version: "1",
+              chainId: X_LAYER_TESTNET.id,
+              verifyingContract: CONTRACTS.payToken,
+            },
+            types: PERMIT_TYPES,
+            primaryType: "Permit",
+            message: {
+              owner: address,
+              spender: CONTRACTS.router,
+              value: maxUint256,
+              nonce,
+              deadline,
+            },
+          });
+          const { v, r, s } = hexToSignature(permitSignature);
+
+          dispatch({ type: "tx-status", status: "awaiting-signature" });
+
+          await publicClient.simulateContract({
+            address: CONTRACTS.router,
+            abi: routerAbi,
+            functionName: "settleWithPermit",
+            args: [
+              settleArgs,
+              quote.signature as Hex,
+              maxUint256,
+              deadline,
+              Number(v),
+              r,
+              s,
+            ],
+            account: address,
+          });
+
+          hash = await walletClient.writeContract({
+            address: CONTRACTS.router,
+            abi: routerAbi,
+            functionName: "settleWithPermit",
+            args: [
+              settleArgs,
+              quote.signature as Hex,
+              maxUint256,
+              deadline,
+              Number(v),
+              r,
+              s,
+            ],
+            account: address,
+            chain: xLayerTestnet,
+          });
         }
-
-        dispatch({ type: "tx-status", status: "awaiting-signature" });
-
-        // Simulating first turns most reverts into a clear message before the wallet opens.
-        await publicClient.simulateContract({
-          address: CONTRACTS.router,
-          abi: routerAbi,
-          functionName: "settle",
-          args: [settleArgs, quote.signature as Hex],
-          account: address,
-        });
-
-        const hash = await walletClient.writeContract({
-          address: CONTRACTS.router,
-          abi: routerAbi,
-          functionName: "settle",
-          args: [settleArgs, quote.signature as Hex],
-          account: address,
-          chain: xLayerTestnet,
-        });
 
         dispatch({ type: "tx-status", status: "pending", hash });
 

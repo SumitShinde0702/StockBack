@@ -42,6 +42,9 @@ pnpm dev
 
 See [docs/CONTRACTS.md](docs/CONTRACTS.md) for the full deployment walkthrough.
 
+A recorded X Layer testnet settlement (S$12.50, Ah Hock Kopitiam) is
+[0xbea6e47f944132bd5b2cfe6c2d4612948830a2f9da01a229c7725c6808b22bb9](https://www.okx.com/web3/explorer/xlayer-test/tx/0xbea6e47f944132bd5b2cfe6c2d4612948830a2f9da01a229c7725c6808b22bb9).
+
 ## Layout
 
 ```

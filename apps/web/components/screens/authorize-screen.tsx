@@ -7,8 +7,12 @@ import { useAppDispatch, useAppState, type TxStatus } from "@/lib/store";
 import { cn } from "@/lib/cn";
 
 const STEPS: Array<{ id: TxStatus; label: string; detail: string }> = [
-  { id: "approving", label: "Approve token", detail: "Allow the router to move your payment asset." },
-  { id: "awaiting-signature", label: "Sign payment", detail: "Confirm the transaction in your wallet." },
+  {
+    id: "approving",
+    label: "Sign allowance",
+    detail: "One free signature — no waiting for an approve transaction to mine.",
+  },
+  { id: "awaiting-signature", label: "Confirm settle", detail: "One X Layer transaction settles the payment." },
   { id: "pending", label: "Settle on X Layer", detail: "Waiting for the block to include it." },
 ];
 

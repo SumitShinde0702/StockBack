@@ -14,6 +14,7 @@ export interface TestTokenLike extends BaseContract {
   mint(to: string, amount: bigint): Tx;
   approve(spender: string, amount: bigint): Tx;
   balanceOf(account: string): Promise<bigint>;
+  nonces(owner: string): Promise<bigint>;
 }
 
 export interface QuoteArg {
@@ -34,6 +35,15 @@ export interface RouterLike extends BaseContract {
   connect(runner: Signer): RouterLike;
 
   settle(quote: QuoteArg, signature: string): Tx;
+  settleWithPermit(
+    quote: QuoteArg,
+    signature: string,
+    value: bigint,
+    deadline: bigint,
+    v: number,
+    r: string,
+    s: string,
+  ): Tx;
   claimRewards(amount: bigint): Tx;
   fundRewards(amount: bigint): Tx;
   registerMerchant(identifierHash: string, settlement: string): Tx;

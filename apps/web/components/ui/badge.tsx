@@ -41,10 +41,13 @@ export function Badge({
 /**
  * Rail badges exist so a viewer can tell which parts of the demo are real onchain
  * actions and which are locally decoded data. Do not reuse these tones elsewhere.
+ *
+ * SGQR is "Local · decoded" on purpose: Singapore's QR never carries an EVM address,
+ * so parsing stays on-device. Settlement is the onchain rail.
  */
 export function RailBadge({ rail }: { rail: "sgqr" | "xlayer" | "reward" }) {
   const copy = {
-    sgqr: { label: "Offchain · decoded", tone: "neutral" as const },
+    sgqr: { label: "Local · decoded", tone: "neutral" as const },
     xlayer: { label: "Onchain · X Layer", tone: "chain" as const },
     reward: { label: "Ledger · xStock", tone: "gold" as const },
   }[rail];

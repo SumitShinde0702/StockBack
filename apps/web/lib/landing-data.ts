@@ -147,7 +147,7 @@ export const REAL: string[] = [
   "SGQR parsing, including CRC rejection of malformed codes",
   "Live OKX v5 public market data for every quote",
   "EIP-712 quote signing, verified on-chain by the router",
-  "Settlement on X Layer: one debit, three transfers, replay-protected",
+  "Settlement on X Layer: one debit, three transfers, replay-protected — sample tx on explorer",
   "A reward ledger whose claims are checked against real balances",
 ];
 

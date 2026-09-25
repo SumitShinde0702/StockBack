@@ -13,7 +13,9 @@ the demo, not after.
   on-chain. The router recomputes the fee split itself, so a compromised signer still
   cannot change the economics.
 - **Settlement.** `StockBackRouter.settle` moves a real ERC-20 on X Layer, splits it three
-  ways, and records the invoice. The transaction is visible on the explorer.
+  ways, and records the invoice. A recorded sample is
+  [0xbea6…2bb9](https://www.okx.com/web3/explorer/xlayer-test/tx/0xbea6e47f944132bd5b2cfe6c2d4612948830a2f9da01a229c7725c6808b22bb9)
+  (block 41869095).
 - **The reward ledger.** Credit, backing checks and claims are all on-chain, and the
   contract refuses to pay a claim it does not hold tokens for.
 

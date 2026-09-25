@@ -1,4 +1,5 @@
 import type { Address } from "viem";
+import { DEPLOYMENT } from "./deployment";
 
 /** X Layer testnet. Overridable so a judge can point the app at their own deployment. */
 export const X_LAYER_TESTNET = {
@@ -19,15 +20,20 @@ export function explorerAddress(address: string) {
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
-function envAddress(value: string | undefined): Address {
-  return (value && /^0x[0-9a-fA-F]{40}$/.test(value) ? value : ZERO) as Address;
+function envAddress(value: string | undefined, fallback?: string): Address {
+  if (value && /^0x[0-9a-fA-F]{40}$/.test(value)) return value as Address;
+  if (fallback && /^0x[0-9a-fA-F]{40}$/.test(fallback)) return fallback as Address;
+  return ZERO as Address;
 }
 
-/** Filled in by `packages/contracts` deployment; see docs/CONTRACTS.md. */
+/**
+ * Prefer env so a judge can re-point the app; fall back to the recorded testnet
+ * deployment so a missing or stale process.env does not silently disable settlement.
+ */
 export const CONTRACTS = {
-  router: envAddress(process.env.NEXT_PUBLIC_ROUTER_ADDRESS),
-  payToken: envAddress(process.env.NEXT_PUBLIC_PAY_TOKEN_ADDRESS),
-  rewardToken: envAddress(process.env.NEXT_PUBLIC_REWARD_TOKEN_ADDRESS),
+  router: envAddress(process.env.NEXT_PUBLIC_ROUTER_ADDRESS, DEPLOYMENT.router),
+  payToken: envAddress(process.env.NEXT_PUBLIC_PAY_TOKEN_ADDRESS, DEPLOYMENT.payToken),
+  rewardToken: envAddress(process.env.NEXT_PUBLIC_REWARD_TOKEN_ADDRESS, DEPLOYMENT.rewardToken),
 } as const;
 
 export const CONTRACTS_CONFIGURED =
@@ -110,19 +116,28 @@ export const MERCHANT_REGISTRY: Record<string, RegisteredMerchant> = {
     uen: "202401234K",
     displayName: "Ah Hock Kopitiam",
     category: "Coffee shop",
-    settlementAddress: envAddress(process.env.NEXT_PUBLIC_MERCHANT_A),
+    settlementAddress: envAddress(
+      process.env.NEXT_PUBLIC_MERCHANT_A,
+      DEPLOYMENT.merchants["202401234K"],
+    ),
   },
   "199805678M": {
     uen: "199805678M",
     displayName: "Bras Basah Books",
     category: "Bookstore",
-    settlementAddress: envAddress(process.env.NEXT_PUBLIC_MERCHANT_B),
+    settlementAddress: envAddress(
+      process.env.NEXT_PUBLIC_MERCHANT_B,
+      DEPLOYMENT.merchants["199805678M"],
+    ),
   },
   "53401234X": {
     uen: "53401234X",
     displayName: "Maxwell Stall 42",
     category: "Hawker stall",
-    settlementAddress: envAddress(process.env.NEXT_PUBLIC_MERCHANT_C),
+    settlementAddress: envAddress(
+      process.env.NEXT_PUBLIC_MERCHANT_C,
+      DEPLOYMENT.merchants["53401234X"],
+    ),
   },
 };
 

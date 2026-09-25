@@ -178,6 +178,70 @@ describe("StockBackRouter", () => {
       expect(await f.payToken.balanceOf(routerAddress)).to.equal(0n);
     });
 
+    it("settles via ERC-2612 permit without a prior approve transaction", async () => {
+      const f = await deployFixture();
+      const routerAddress = await f.router.getAddress();
+      const payTokenAddress = await f.payToken.getAddress();
+
+      // Start from zero allowance so settle alone would fail.
+      await f.payToken.connect(f.payer).approve(routerAddress, 0n);
+
+      const quote = await makeQuote({
+        router: routerAddress,
+        payer: f.payer.address,
+        merchant: f.merchant.address,
+        payToken: payTokenAddress,
+        rewardToken: await f.rewardToken.getAddress(),
+      });
+      const signature = await sign(f.quoteSigner, routerAddress, quote);
+      const value = quote.merchantAmount + quote.protocolFee + quote.rewardFee;
+      const deadline = BigInt((await time.latest()) + 600);
+      const nonce = await f.payToken.nonces(f.payer.address);
+      const { chainId } = await ethers.provider.getNetwork();
+
+      const permitSig = await f.payer.signTypedData(
+        {
+          name: "StockBack Demo USD",
+          version: "1",
+          chainId,
+          verifyingContract: payTokenAddress,
+        },
+        {
+          Permit: [
+            { name: "owner", type: "address" },
+            { name: "spender", type: "address" },
+            { name: "value", type: "uint256" },
+            { name: "nonce", type: "uint256" },
+            { name: "deadline", type: "uint256" },
+          ],
+        },
+        {
+          owner: f.payer.address,
+          spender: routerAddress,
+          value,
+          nonce,
+          deadline,
+        },
+      );
+      const { v, r, s } = ethers.Signature.from(permitSig);
+
+      await expect(
+        f.router.connect(f.payer).settleWithPermit(quote, signature, value, deadline, v, r, s),
+      )
+        .to.emit(f.router, "PaymentSettled")
+        .withArgs(
+          quote.quoteId,
+          quote.invoiceHash,
+          f.payer.address,
+          f.merchant.address,
+          quote.merchantAmount,
+          quote.protocolFee,
+          quote.rewardFee,
+        );
+
+      expect(await f.payToken.balanceOf(f.merchant.address)).to.equal(quote.merchantAmount);
+    });
+
     it("charges exactly the 2% spread and nothing more", async () => {
       const f = await deployFixture();
       const routerAddress = await f.router.getAddress();

@@ -13,13 +13,16 @@ nobody walks away thinking SGQR settles crypto.
 - [ ] Dev server restarted after the env change
 - [ ] A settings cost basis is pre-entered for the asset you will use in the blocked run
 - [ ] X Layer explorer open in a second tab: https://www.okx.com/web3/explorer/xlayer-test
+- [ ] Laptop on [http://localhost:3100/seller](http://localhost:3100/seller) if you will scan a sticker
 - [ ] Browser zoom at 100%, dark room, phone frame visible
+- [ ] Fallback explorer proof if the live wallet path fails:
+      [sample settlement](https://www.okx.com/web3/explorer/xlayer-test/tx/0xbea6e47f944132bd5b2cfe6c2d4612948830a2f9da01a229c7725c6808b22bb9)
 
 ## Beat 1 — A payment that settles (0:00 to 1:15)
 
 > "This is a Singapore SGQR code, the same one you'd see at a hawker stall."
 
-1. Paste or scan the sample SGQR payload.
+1. Scan the Ah Hock sticker on `/seller`, or tap the matching fixture on `/app`.
 2. Open the TLV inspector for two seconds. **Say:** "We're decoding EMVCo tag by tag and
    checking the CRC locally. Nothing about this payload is a wallet address, which matters
    in a moment."

@@ -1,11 +1,11 @@
 {
   "network": "xlayerTestnet",
   "chainId": 1952,
-  "deployedAt": "2026-09-19T14:46:47.783Z",
+  "deployedAt": "2026-09-25T13:12:48.148Z",
   "deployer": "0xfF595e2464102F19d8035790251F4B976d750af4",
-  "router": "0x42dfD0D5401f351D28122c450A0f062d4F866416",
-  "payToken": "0xb2c9ee8E99D782aa2bF7C14484A6d7168819EE3E",
-  "rewardToken": "0xe9e350aD4e479b844E7EBB41e5142497c7BA21e2",
+  "router": "0x54dFC9CcfED6cAc285d60Feb555D3257429879DD",
+  "payToken": "0x4ec93869DE34f14B72E0a464aBdd1312fCe889b4",
+  "rewardToken": "0xa1deF93A70f6e47D992BC132d83dA3D8a4a4e4d4",
   "quoteSigner": "0xe6A2B95d039e1E249E7A4032B39E6E45b282f794",
   "treasury": "0xfF595e2464102F19d8035790251F4B976d750af4",
   "rewardFund": "0xfF595e2464102F19d8035790251F4B976d750af4",
@@ -26,5 +26,5 @@
       "identifierHash": "0xc187dd2b30dd9473ac7da300fa57b55a315722b8a5fc26141d00b54e6ee4946a"
     }
   },
-  "notes": "DemoUSD and MockXNVDA are test tokens. MockXNVDA is not an xStock and carries no equity exposure."
+  "notes": "DemoUSD and MockXNVDA are test tokens. DemoUSD supports EIP-2612 permit for one-tx settlement. MockXNVDA is not an xStock."
 }

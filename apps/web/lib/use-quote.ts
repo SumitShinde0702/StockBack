@@ -33,7 +33,7 @@ export function useQuote() {
           fiatMinorUnits: invoice.fiatMinorUnits.toString(),
           payAssetSymbol,
           rewardAssetSymbol: settings.rewardAssetSymbol,
-          invoiceRef: invoice.payload.raw,
+          invoiceRef: `${invoice.payload.raw}#${Date.now()}:${crypto.randomUUID()}`,
           payerAddress: address,
         }),
       });

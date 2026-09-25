@@ -4,8 +4,10 @@ import { Hero } from "@/components/landing/hero";
 import { Problem } from "@/components/landing/problem";
 import { Impact } from "@/components/landing/impact";
 import { Solution } from "@/components/landing/solution";
+import { Architecture } from "@/components/landing/architecture";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { Honesty } from "@/components/landing/honesty";
+import { Deployment } from "@/components/landing/deployment";
 import { PhoneCta } from "@/components/landing/phone-cta";
 import { LandingFooter } from "@/components/landing/landing-footer";
 
@@ -32,8 +34,10 @@ export default function LandingPage() {
         <Problem />
         <Impact />
         <Solution />
+        <Architecture />
         <HowItWorks />
         <Honesty />
+        <Deployment />
         <PhoneCta />
       </main>
       <LandingFooter />

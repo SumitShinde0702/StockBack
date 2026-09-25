@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit",
     "deploy:local": "hardhat run scripts/deploy.ts",
     "deploy:xlayer": "hardhat run scripts/deploy.ts --network xlayerTestnet",
+    "deploy:xlayer:resilient": "ts-node scripts/deploy-resilient.ts",
     "seed:xlayer": "ts-node scripts/seed.ts"
   },
   "devDependencies": {

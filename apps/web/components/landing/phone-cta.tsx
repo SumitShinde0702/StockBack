@@ -4,14 +4,7 @@ import { ArrowRight, ArrowUpRight, Smartphone } from "lucide-react";
 import { Section } from "./section";
 import { Reveal } from "./reveal";
 import { getPhoneAccess } from "@/lib/phone-url";
-import { CONTRACTS, CONTRACTS_CONFIGURED, X_LAYER_TESTNET, explorerAddress } from "@/lib/config";
-import { shortAddress } from "@/lib/format";
-
-const DEPLOYED = [
-  { label: "Router", key: "router" },
-  { label: "Payment token", key: "payToken" },
-  { label: "Reward token", key: "rewardToken" },
-] as const;
+import { X_LAYER_TESTNET } from "@/lib/config";
 
 export async function PhoneCta() {
   const access = await getPhoneAccess("/app");
@@ -62,29 +55,18 @@ export async function PhoneCta() {
                     {X_LAYER_TESTNET.name} · chain {X_LAYER_TESTNET.id}
                   </dd>
                 </div>
-                {CONTRACTS_CONFIGURED ? (
-                  DEPLOYED.map((item) => (
-                    <div key={item.key} className="flex items-baseline justify-between gap-4">
-                      <dt className="text-[12.5px] text-ink-muted">{item.label}</dt>
-                      <dd>
-                        <a
-                          href={explorerAddress(CONTRACTS[item.key])}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 font-mono text-[12.5px] text-chain transition-colors duration-200 ease-standard hover:text-ink"
-                        >
-                          {shortAddress(CONTRACTS[item.key], 8, 6)}
-                          <ArrowUpRight size={12} aria-hidden="true" />
-                        </a>
-                      </dd>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-[12.5px] text-ink-muted">Contracts</dt>
-                    <dd className="text-[12.5px] text-warn">Not configured in this environment</dd>
-                  </div>
-                )}
+                <div className="flex items-baseline justify-between gap-4">
+                  <dt className="text-[12.5px] text-ink-muted">Contracts</dt>
+                  <dd>
+                    <a
+                      href="#deployment"
+                      className="inline-flex items-center gap-1 text-[12.5px] font-medium text-chain transition-colors duration-200 ease-standard hover:text-ink"
+                    >
+                      View on this page
+                      <ArrowUpRight size={12} aria-hidden="true" />
+                    </a>
+                  </dd>
+                </div>
               </dl>
             </div>
           </Reveal>

@@ -5,9 +5,9 @@ import { Reveal } from "./reveal";
 import { HeroDevice } from "./hero-device";
 
 const PROOF = [
-  "Deployed on X Layer testnet",
-  "26 contract tests passing",
-  "Live OKX market data",
+  { label: "Deployed on X Layer testnet", href: "#deployment" },
+  { label: "Sample settlement on explorer", href: "#deployment" },
+  { label: "Live OKX market data", href: null },
 ];
 
 export function Hero() {
@@ -72,9 +72,18 @@ export function Hero() {
             <Reveal delay={0.2}>
               <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2.5">
                 {PROOF.map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-[13px] text-ink-muted">
+                  <li key={item.label} className="flex items-center gap-2 text-[13px] text-ink-muted">
                     <CircleCheck size={14} className="text-good" aria-hidden="true" />
-                    {item}
+                    {item.href ? (
+                      <a
+                        href={item.href}
+                        className="transition-colors duration-200 ease-standard hover:text-ink"
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      item.label
+                    )}
                   </li>
                 ))}
               </ul>

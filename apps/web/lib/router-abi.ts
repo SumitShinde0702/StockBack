@@ -32,6 +32,37 @@ export const routerAbi = [
   },
   {
     type: "function",
+    name: "settleWithPermit",
+    stateMutability: "nonpayable",
+    inputs: [
+      {
+        name: "quote",
+        type: "tuple",
+        components: [
+          { name: "quoteId", type: "bytes32" },
+          { name: "invoiceHash", type: "bytes32" },
+          { name: "payer", type: "address" },
+          { name: "merchant", type: "address" },
+          { name: "payToken", type: "address" },
+          { name: "rewardToken", type: "address" },
+          { name: "merchantAmount", type: "uint256" },
+          { name: "protocolFee", type: "uint256" },
+          { name: "rewardFee", type: "uint256" },
+          { name: "rewardUnits", type: "uint256" },
+          { name: "expiry", type: "uint64" },
+        ],
+      },
+      { name: "signature", type: "bytes" },
+      { name: "value", type: "uint256" },
+      { name: "deadline", type: "uint256" },
+      { name: "v", type: "uint8" },
+      { name: "r", type: "bytes32" },
+      { name: "s", type: "bytes32" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
     name: "claimRewards",
     stateMutability: "nonpayable",
     inputs: [{ name: "amount", type: "uint256" }],
@@ -138,6 +169,20 @@ export const erc20Abi = [
     inputs: [],
     outputs: [{ type: "string" }],
   },
+  {
+    type: "function",
+    name: "nonces",
+    stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "name",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "string" }],
+  },
 ] as const;
 
 /**
@@ -151,28 +196,81 @@ export function describeSettlementError(error: unknown): { status: "rejected" | 
     (error as { shortMessage?: string })?.shortMessage ??
     (error as { message?: string })?.message ??
     "The payment failed.";
+  const blob = `${name} ${raw}`;
 
-  if (code === 4001 || /UserRejected|rejected the request|User denied/i.test(`${name} ${raw}`)) {
+  if (code === 4001 || /UserRejected|rejected the request|User denied/i.test(blob)) {
     return { status: "rejected", message: "You dismissed the request in your wallet. Nothing was charged." };
   }
 
-  const revert = raw.match(/(QuoteExpired|QuoteAlreadySettled|InvoiceAlreadySettled|PayerMismatch|MerchantNotRegistered|UnsupportedPayToken|UnsupportedRewardToken|BadSignature|FeeSplitMismatch|InsufficientRewardBacking|ClaimExceedsLedger|NothingToClaim|ERC20InsufficientBalance|ERC20InsufficientAllowance)/);
+  // OZ / MetaMask often surface only the function name. Decode common selectors.
+  if (/0xfb8f41b2|ERC20InsufficientAllowance/i.test(blob)) {
+    return {
+      status: "failed",
+      message:
+        "The router did not have permission to move your DemoUSD yet. Confirm the permit signature and try again — no separate approve wait.",
+    };
+  }
+  if (/0x65c2160b|InvoiceAlreadySettled/i.test(blob)) {
+    return {
+      status: "failed",
+      message: "This invoice was already paid. Start a fresh scan — each payment needs a new quote.",
+    };
+  }
+  if (/0x3c9e5efc|QuoteAlreadySettled/i.test(blob)) {
+    return {
+      status: "failed",
+      message: "This quote was already settled. Go back and refresh the price.",
+    };
+  }
+  if (/0x5cd5d233|BadSignature/i.test(blob)) {
+    return {
+      status: "failed",
+      message: "The router rejected the quote signature. Hard-refresh the app and get a new quote.",
+    };
+  }
+  if (/0xa7b0ffd4|PayerMismatch/i.test(blob)) {
+    return {
+      status: "failed",
+      message: "This quote was priced for a different wallet. Switch to the wallet you connected, then refresh.",
+    };
+  }
+  if (/0xe450d38c|ERC20InsufficientBalance/i.test(blob)) {
+    return {
+      status: "failed",
+      message: "Not enough DemoUSD in this wallet. Import token 0x4ec9…89b4 and use the seeded deployer account.",
+    };
+  }
+
+  // MetaMask's generic line when a custom error was stripped from the response.
+  if (/function ["']?settle["']? reverted|execution reverted/i.test(blob) && !/0x[0-9a-fA-F]{8}/.test(blob)) {
+    return {
+      status: "failed",
+      message:
+        "Settlement reverted on X Layer. Common causes: this QR invoice was already paid, the quote expired, or this wallet is not the one the quote was priced for. Go back, refresh the price, and try once.",
+    };
+  }
+
+  const revert = raw.match(/(QuoteExpired|QuoteAlreadySettled|InvoiceAlreadySettled|PayerMismatch|MerchantNotRegistered|UnsupportedPayToken|UnsupportedRewardToken|BadSignature|FeeSplitMismatch|InsufficientRewardBacking|ClaimExceedsLedger|NothingToClaim|ERC20InsufficientBalance|ERC20InsufficientAllowance|ERC2612ExpiredSignature|ERC2612InvalidSigner)/);
 
   const explanations: Record<string, string> = {
-    QuoteExpired: "The quote expired before the transaction landed. Get a fresh price and try again.",
-    QuoteAlreadySettled: "This quote was already settled. Start a new payment.",
-    InvoiceAlreadySettled: "This invoice has already been paid once.",
+    InvoiceAlreadySettled: "This invoice was already paid. Start a fresh scan — each payment needs a new quote.",
+    QuoteAlreadySettled: "This quote was already settled. Go back and refresh the price.",
     PayerMismatch: "The quote was issued to a different wallet than the one signing.",
     MerchantNotRegistered: "The router no longer recognises this merchant's settlement address.",
     UnsupportedPayToken: "The router does not settle the token this quote names.",
     UnsupportedRewardToken: "The router's reward token does not match the quote.",
-    BadSignature: "The router rejected the quote signature. The price was not issued by this deployment.",
+    BadSignature: "The router rejected the quote signature. Hard-refresh the app and get a new quote.",
     FeeSplitMismatch: "The router recomputed the 1% / 1% split and it did not match the quote.",
     InsufficientRewardBacking: "The reward buffer does not hold enough tokens to cover this claim yet.",
     ClaimExceedsLedger: "That is more than your ledger balance.",
     NothingToClaim: "This wallet has no cashback credited.",
-    ERC20InsufficientBalance: "Your wallet does not hold enough of the payment token.",
-    ERC20InsufficientAllowance: "The token approval was not high enough. Approve again and retry.",
+    ERC20InsufficientBalance:
+      "Not enough DemoUSD in this wallet. Import token 0x4ec93869DE34f14B72E0a464aBdd1312fCe889b4 (6 decimals).",
+    QuoteExpired: "The quote expired before the transaction landed. Get a fresh price and try again.",
+    ERC20InsufficientAllowance:
+      "The router did not have permission to move your DemoUSD yet. Confirm the permit signature and try again.",
+    ERC2612ExpiredSignature: "The permit signature expired. Confirm again — it takes a few seconds.",
+    ERC2612InvalidSigner: "The permit was signed by a different wallet than the one paying.",
   };
 
   if (revert && explanations[revert[1]]) {
